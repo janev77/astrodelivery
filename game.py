@@ -4,7 +4,7 @@ import math
 
 pygame.init()
 
-WIDTH, HEIGHT = 1600, 800
+WIDTH, HEIGHT = 1400, 800
 FPS = 60
 
 BLACK = (0, 0, 0)
