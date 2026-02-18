@@ -80,10 +80,12 @@ def draw_center_text(screen, font, text, y, color=WHITE):
 
 
 def draw_overlay(screen, alpha=160, blur_factor=6):
-
+    """Draw a blurred + semi-transparent dark overlay over the entire screen."""
+    # Fake blur: shrink the current screen down then scale back up
     small = pygame.transform.smoothscale(screen, (WIDTH // blur_factor, HEIGHT // blur_factor))
     blurred = pygame.transform.smoothscale(small, (WIDTH, HEIGHT))
     screen.blit(blurred, (0, 0))
+    # Then darken on top
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, alpha))
     screen.blit(overlay, (0, 0))
@@ -123,6 +125,8 @@ def main():
     state = "MENU"
     level = 1
     score = 0
+    menu_option = 0  # 0 = Start Game, 1 = Quit
+    MENU_OPTIONS = ["Start Game", "Quit"]
 
     # Ship state
     ship_x, ship_y = WIDTH // 2, HEIGHT // 2
@@ -220,9 +224,17 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     return
 
-                if event.key == pygame.K_SPACE and state == "MENU":
-                    state = "PLAY"
-                    setup_level(level)
+                if state == "MENU":
+                    if event.key == pygame.K_UP:
+                        menu_option = (menu_option - 1) % len(MENU_OPTIONS)
+                    if event.key == pygame.K_DOWN:
+                        menu_option = (menu_option + 1) % len(MENU_OPTIONS)
+                    if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        if menu_option == 0:
+                            state = "PLAY"
+                            setup_level(level)
+                        elif menu_option == 1:
+                            return
 
                 if event.key == pygame.K_r and state in ("GAME_OVER", "WIN"):
                     level = 1
@@ -457,23 +469,35 @@ def main():
             screen.blit(background, (0, 0))
             draw_overlay(screen, alpha=160)
 
-            draw_center_text(screen, big_font, "ASTRO DELIVERY", HEIGHT // 2 - 220, YELLOW)
+            draw_center_text(screen, big_font, "ASTRO DELIVERY", HEIGHT // 2 - 230, YELLOW)
 
             # Controls
-            draw_center_text(screen, font, "CONTROLS:", HEIGHT // 2 - 150, WHITE)
-            draw_center_text(screen, font, "LEFT / RIGHT - Rotate ship", HEIGHT // 2 - 120, WHITE)
-            draw_center_text(screen, font, "UP / DOWN - Thrust", HEIGHT // 2 - 90, WHITE)
-            draw_center_text(screen, font, "SPACE - Shoot (Level 3)", HEIGHT // 2 - 60, WHITE)
+            draw_center_text(screen, font, "CONTROLS:", HEIGHT // 2 - 155, WHITE)
+            draw_center_text(screen, font, "LEFT / RIGHT - Rotate ship", HEIGHT // 2 - 125, WHITE)
+            draw_center_text(screen, font, "UP / DOWN - Thrust", HEIGHT // 2 - 95, WHITE)
+            draw_center_text(screen, font, "SPACE - Shoot (Level 3)", HEIGHT // 2 - 65, WHITE)
 
-            # Levels
-            draw_center_text(screen, font, "LEVEL 1-2:", HEIGHT // 2 - 10, YELLOW)
-            draw_center_text(screen, font, "Pick up the STAR and deliver to the STATION", HEIGHT // 2 + 20, WHITE)
+            # Levels info
+            draw_center_text(screen, font, "LEVEL 1-2: Pick up the STAR and deliver to the STATION", HEIGHT // 2 - 20, WHITE)
+            draw_center_text(screen, font, "LEVEL 3: Pick STAR -> SPACE to shoot the boss", HEIGHT // 2 + 10, WHITE)
 
-            draw_center_text(screen, font, "LEVEL 3 - FINAL BOSS:", HEIGHT // 2 + 70, RED)
-            draw_center_text(screen, font, "Pick STAR -> press SPACE to shoot the boss", HEIGHT // 2 + 100, WHITE)
-            draw_center_text(screen, font, "Avoid boss and its bullets!", HEIGHT // 2 + 130, WHITE)
+            option_start_y = HEIGHT // 2 + 80
+            option_gap = 75
+            for i, option in enumerate(MENU_OPTIONS):
+                if i == menu_option:
+                    opt_surf = big_font.render(option, True, WHITE)
+                    opt_x = WIDTH // 2 - opt_surf.get_width() // 2
+                    opt_y = option_start_y + i * option_gap
 
-            draw_center_text(screen, font, "Press SPACE to START", HEIGHT // 2 + 200, GREEN)
+                    glow = pygame.Surface((opt_surf.get_width() + 40, opt_surf.get_height() + 10), pygame.SRCALPHA)
+                    glow.fill(GRAY)
+                    screen.blit(glow, (opt_x - 20, opt_y - 5))
+                    screen.blit(opt_surf, (opt_x, opt_y))
+
+                else:
+                    opt_surf = big_font.render(option, True, GRAY)
+                    opt_x = WIDTH // 2 - opt_surf.get_width() // 2
+                    screen.blit(opt_surf, (opt_x, option_start_y + i * option_gap))
 
             pygame.display.flip()
             continue
