@@ -79,7 +79,11 @@ def draw_center_text(screen, font, text, y, color=WHITE):
     screen.blit(surf, (WIDTH // 2 - surf.get_width() // 2, y))
 
 
-def draw_overlay(screen, alpha=160):
+def draw_overlay(screen, alpha=160, blur_factor=6):
+
+    small = pygame.transform.smoothscale(screen, (WIDTH // blur_factor, HEIGHT // blur_factor))
+    blurred = pygame.transform.smoothscale(small, (WIDTH, HEIGHT))
+    screen.blit(blurred, (0, 0))
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, alpha))
     screen.blit(overlay, (0, 0))
