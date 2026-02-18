@@ -79,6 +79,12 @@ def draw_center_text(screen, font, text, y, color=WHITE):
     screen.blit(surf, (WIDTH // 2 - surf.get_width() // 2, y))
 
 
+def draw_overlay(screen, alpha=160):
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, alpha))
+    screen.blit(overlay, (0, 0))
+
+
 def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
@@ -445,6 +451,7 @@ def main():
         # ---------- MENU SCREEN ----------
         if state == "MENU":
             screen.blit(background, (0, 0))
+            draw_overlay(screen, alpha=160)
 
             draw_center_text(screen, big_font, "ASTRO DELIVERY", HEIGHT // 2 - 220, YELLOW)
 
@@ -468,17 +475,20 @@ def main():
             continue
 
         if state == "LEVEL_COMPLETE":
+            draw_overlay(screen, alpha=160)
             draw_center_text(screen, big_font, f"LEVEL {level} COMPLETE!", HEIGHT // 2 - 90, YELLOW)
             draw_center_text(screen, font, "Press SPACE for next level", HEIGHT // 2 + 10, WHITE)
             draw_center_text(screen, font, "ESC to quit", HEIGHT // 2 + 45, WHITE)
 
         if state == "GAME_OVER":
+            draw_overlay(screen, alpha=160)
             draw_center_text(screen, big_font, "GAME OVER", HEIGHT // 2 - 90, RED)
             draw_center_text(screen, font, f"Score: {score}", HEIGHT // 2 - 10, WHITE)
             draw_center_text(screen, font, "Press R to restart", HEIGHT // 2 + 30, WHITE)
             draw_center_text(screen, font, "ESC to quit", HEIGHT // 2 + 65, WHITE)
 
         if state == "WIN":
+            draw_overlay(screen, alpha=160)
             draw_center_text(screen, big_font, "YOU WIN!", HEIGHT // 2 - 110, GREEN)
             draw_center_text(screen, font, "Final Boss defeated", HEIGHT // 2 - 30, WHITE)
             draw_center_text(screen, font, f"Score: {score}", HEIGHT // 2 + 10, WHITE)
