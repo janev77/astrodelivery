@@ -80,11 +80,12 @@ def draw_center_text(screen, font, text, y, color=WHITE):
 
 
 def draw_overlay(screen, alpha=160, blur_factor=6):
-    """Draw a blurred + semi-transparent dark overlay over the entire screen."""
+
     # Fake blur: shrink the current screen down then scale back up
     small = pygame.transform.smoothscale(screen, (WIDTH // blur_factor, HEIGHT // blur_factor))
     blurred = pygame.transform.smoothscale(small, (WIDTH, HEIGHT))
     screen.blit(blurred, (0, 0))
+
     # Then darken on top
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, alpha))
@@ -446,7 +447,7 @@ def main():
         screen.blit(rotated_ship, rotated_rect.topleft)
 
         if carrying:
-            pygame.draw.circle(screen, YELLOW, (int(ship_x), int(ship_y - 60)), 8)
+            screen.blit(star_img, (int(ship_x) - 20, int(ship_y) - 75))
 
         bar_w = int((fuel / 100) * 150)
         bar_x = WIDTH // 2 - 75
