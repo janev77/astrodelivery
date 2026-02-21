@@ -20,7 +20,7 @@ SAFE_SPAWN_DISTANCE = 320
 
 # ── Vnesi broj na level za direktno testiranje na toj level  ─────────────────
 # 1, 2, 3, None(za default)
-DEBUG_START_LEVEL = None
+DEBUG_START_LEVEL = 3
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -99,6 +99,26 @@ def draw_overlay(screen, alpha=160, blur_factor=6):
 
 def get_bullet_angle(vx, vy):
     return -math.degrees(math.atan2(vy, vx)) - 90
+
+
+NEXT_LEVEL_INSTRUCTIONS = {
+    # Imegju level 1 i level 2
+    1: [
+        ("LEVEL 2 - MORE STARS, MORE ASTEROIDS!", YELLOW),
+        ("Deliver  5  stars  to  the  station  to  complete  the  level.", WHITE),
+        ("Watch out — asteroids are faster and there are more of them.", WHITE),
+        ("Only  2  fuel  packs  available,  so  fly  efficiently!", WHITE),
+    ],
+    # Izmegju level 2 i level 3
+    2: [
+        ("LEVEL 3 - BOSS BATTLE!", YELLOW),
+        ("There is no station.  Pick up the STAR to load your weapon.", WHITE),
+        ("Press  SPACE  to  fire  the  star  at  the  boss.", WHITE),
+        ("Hit the boss  5  times  to  defeat  it.  Don't get hit!", WHITE),
+        ("The boss chases you and shoots — keep moving!", WHITE),
+    ],
+}
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def main():
@@ -538,11 +558,23 @@ def main():
             pygame.display.flip()
             continue
 
+        # ---------- LEVEL COMPLETE SCREEN ----------
         if state == "LEVEL_COMPLETE":
             draw_overlay(screen, alpha=160)
-            draw_center_text(screen, big_font, f"LEVEL {level} COMPLETE!", HEIGHT // 2 - 90, YELLOW)
-            draw_center_text(screen, font, "Press SPACE for next level", HEIGHT // 2 + 10, WHITE)
-            draw_center_text(screen, font, "ESC to quit", HEIGHT // 2 + 45, WHITE)
+            draw_center_text(screen, big_font, f"LEVEL {level} COMPLETE!", HEIGHT // 2 - 180, YELLOW)
+
+            instructions = NEXT_LEVEL_INSTRUCTIONS.get(level)
+            if instructions:
+                inst_y = HEIGHT // 2 - 95
+                line_gap = 38
+                for line_text, line_color in instructions:
+                    draw_center_text(screen, font, line_text, inst_y, line_color)
+                    inst_y += line_gap
+            else:
+                draw_center_text(screen, font, "Get ready for the next challenge!", HEIGHT // 2 - 10, WHITE)
+
+            draw_center_text(screen, font, "Press SPACE to continue", HEIGHT // 2 + 105, WHITE)
+            draw_center_text(screen, font, "ESC to quit", HEIGHT // 2 + 140, WHITE)
 
         if state == "GAME_OVER":
             draw_overlay(screen, alpha=160)
