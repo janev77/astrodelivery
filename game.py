@@ -18,13 +18,11 @@ YELLOW = (255, 234, 5)
 
 SAFE_SPAWN_DISTANCE = 320
 
-# ── Vnesi broj na level za direktno testiranje na toj level  ─────────────────
-# 1, 2, 3, None(za default)
-DEBUG_START_LEVEL = 3
-# ─────────────────────────────────────────────────────────────────────────────
+
+# 1, 2, 3, None(default) for debugging purposes
+DEBUG_START_LEVEL = None
 
 
-# Da izleze od stranite
 def wrap(x, y):
     return x % WIDTH, y % HEIGHT
 
@@ -50,6 +48,11 @@ def safe_rand_pos(avoid_x, avoid_y, min_d=SAFE_SPAWN_DISTANCE, pad=100, tries=12
     return rand_pos(pad)
 
 
+def rand_asteroid_size():
+    size = random.randint(80, 200)
+    return size, size
+
+
 def level_config(level):
     if level == 1:
         return {
@@ -65,7 +68,6 @@ def level_config(level):
             "asteroids_speed": (1.0, 1.8),
             "fuel_packs": 2
         }
-    # Level 3 = Boss
     return {
         "deliveries_needed": 0,
         "asteroids_count": 4,
@@ -74,7 +76,7 @@ def level_config(level):
 
         "boss_hp": 5,
         "boss_speed": 1.0,
-        "boss_shoot_cd": 120,  # поретко пукање
+        "boss_shoot_cd": 120,
         "boss_bullet_speed": 6.0
     }
 
@@ -85,12 +87,10 @@ def draw_center_text(screen, font, text, y, color=WHITE):
 
 
 def draw_overlay(screen, alpha=160, blur_factor=6):
-
     # Fake blur: shrink the current screen down then scale back up
     small = pygame.transform.smoothscale(screen, (WIDTH // blur_factor, HEIGHT // blur_factor))
     blurred = pygame.transform.smoothscale(small, (WIDTH, HEIGHT))
     screen.blit(blurred, (0, 0))
-
     # Then darken on top
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, alpha))
@@ -102,14 +102,14 @@ def get_bullet_angle(vx, vy):
 
 
 NEXT_LEVEL_INSTRUCTIONS = {
-    # Imegju level 1 i level 2
+    #Between level 1 and level 2
     1: [
         ("LEVEL 2 - MORE STARS, MORE ASTEROIDS!", YELLOW),
         ("Deliver  5  stars  to  the  station  to  complete  the  level.", WHITE),
         ("Watch out — asteroids are faster and there are more of them.", WHITE),
         ("Only  2  fuel  packs  available,  so  fly  efficiently!", WHITE),
     ],
-    # Izmegju level 2 i level 3
+    # Between level 2 and level 3
     2: [
         ("LEVEL 3 - BOSS BATTLE!", YELLOW),
         ("There is no station.  Pick up the STAR to load your weapon.", WHITE),
@@ -118,7 +118,6 @@ NEXT_LEVEL_INSTRUCTIONS = {
         ("The boss chases you and shoots — keep moving!", WHITE),
     ],
 }
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 def main():
@@ -146,7 +145,6 @@ def main():
         print("Error loading images. Make sure all images are in the images folder.")
         return
 
-    # Player bullet uses star_img (scaled down for projectile size)
     player_bullet_img_base = pygame.transform.smoothscale(star_img, (30, 30))
 
     try:
@@ -166,10 +164,9 @@ def main():
     state = "MENU"
     level = 1
     score = 0
-    menu_option = 0  # 0 = Start Game, 1 = Quit
+    menu_option = 0
     MENU_OPTIONS = ["Start Game", "Quit"]
 
-    # Ship state
     ship_x, ship_y = WIDTH // 2, HEIGHT // 2
     ship_vx, ship_vy = 0.0, 0.0
     ship_angle = 0
@@ -235,7 +232,8 @@ def main():
             sy = random.uniform(cfg["asteroids_speed"][0], cfg["asteroids_speed"][1])
             vx = random.choice([-1, 1]) * sx
             vy = random.choice([-1, 1]) * sy
-            asteroids.append([ax, ay, vx, vy])
+            w, h = rand_asteroid_size()
+            asteroids.append([ax, ay, vx, vy, w, h])
 
         fuel_packs = []
         for _ in range(cfg["fuel_packs"]):
@@ -253,7 +251,6 @@ def main():
 
             star_x, star_y = safe_rand_pos(boss_x, boss_y, min_d=420)
 
-    # za testiranje
     if DEBUG_START_LEVEL in (1, 2, 3):
         level = DEBUG_START_LEVEL
         score = 0
@@ -309,7 +306,7 @@ def main():
                     bvx = fx * bullet_speed + ship_vx
                     bvy = fy * bullet_speed + ship_vy
 
-                    player_bullets.append([bx, by, bvx, bvy, 180, False])  # life
+                    player_bullets.append([bx, by, bvx, bvy, 180, False])
                     carrying = False
                     star_x, star_y = safe_rand_pos(boss_x, boss_y, min_d=420)
                     shoot_cd = 12
@@ -358,7 +355,7 @@ def main():
             ship_rect = pygame.Rect(ship_x - 30, ship_y - 30, 60, 60)
 
             for ast in asteroids:
-                ast_rect = pygame.Rect(ast[0] - 70, ast[1] - 70, 140, 140)
+                ast_rect = pygame.Rect(ast[0] - ast[4]//2, ast[1] - ast[5]//2, ast[4], ast[5])
                 if ship_rect.colliderect(ast_rect):
                     state = "GAME_OVER"
 
@@ -477,11 +474,11 @@ def main():
             screen.blit(fuel_tank_img, (fp[0] - 30, fp[1] - 30))
 
         for ast in asteroids:
-            screen.blit(asteroid_img, (int(ast[0]) - 100, int(ast[1]) - 100))
+            scaled_ast = pygame.transform.smoothscale(asteroid_img, (ast[4], ast[5]))
+            screen.blit(scaled_ast, (int(ast[0]) - ast[4]//2, int(ast[1]) - ast[5]//2))
 
         if boss_active:
             screen.blit(boss_img, (int(boss_x) - 130, int(boss_y) - 130))
-            # Draw boss bullets
             for b in boss_bullets:
                 if use_bullet_img:
                     angle = get_bullet_angle(b[2], b[3])
@@ -491,7 +488,6 @@ def main():
                 else:
                     pygame.draw.circle(screen, RED, (int(b[0]), int(b[1])), 6)
 
-        # Draw player bullets
         for pb in player_bullets:
             rotated = pygame.transform.rotate(player_bullet_img_base, get_bullet_angle(pb[2], pb[3]))
             rect = rotated.get_rect(center=(int(pb[0]), int(pb[1])))
@@ -520,20 +516,17 @@ def main():
                 screen.blit(font.render(f"BOSS HP: {boss_hp}", True, RED), (20, 55))
                 screen.blit(font.render("Level 3: Pick STAR -> SPACE to shoot", True, WHITE), (20, 85))
 
-        # ---------- MENU SCREEN ----------
         if state == "MENU":
             screen.blit(background, (0, 0))
             draw_overlay(screen, alpha=160)
 
             draw_center_text(screen, big_font, "ASTRO DELIVERY", HEIGHT // 2 - 230, YELLOW)
 
-            # Controls
             draw_center_text(screen, font, "CONTROLS:", HEIGHT // 2 - 155, WHITE)
             draw_center_text(screen, font, "LEFT / RIGHT - Rotate ship", HEIGHT // 2 - 125, WHITE)
             draw_center_text(screen, font, "UP / DOWN - Thrust", HEIGHT // 2 - 95, WHITE)
             draw_center_text(screen, font, "SPACE - Shoot (Level 3)", HEIGHT // 2 - 65, WHITE)
 
-            # Levels info
             draw_center_text(screen, font, "LEVEL 1-2: Pick up the STAR and deliver to the STATION", HEIGHT // 2 - 20, WHITE)
             draw_center_text(screen, font, "LEVEL 3: Pick STAR -> SPACE to shoot the boss", HEIGHT // 2 + 10, WHITE)
 
@@ -558,7 +551,6 @@ def main():
             pygame.display.flip()
             continue
 
-        # ---------- LEVEL COMPLETE SCREEN ----------
         if state == "LEVEL_COMPLETE":
             draw_overlay(screen, alpha=160)
             draw_center_text(screen, big_font, f"LEVEL {level} COMPLETE!", HEIGHT // 2 - 180, YELLOW)
