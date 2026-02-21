@@ -18,6 +18,11 @@ YELLOW = (255, 234, 5)
 
 SAFE_SPAWN_DISTANCE = 320
 
+# ── Vnesi broj na level za direktno testiranje na toj level  ─────────────────
+# 1, 2, 3, None(za default)
+DEBUG_START_LEVEL = None
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 # Da izleze od stranite
 def wrap(x, y):
@@ -92,6 +97,10 @@ def draw_overlay(screen, alpha=160, blur_factor=6):
     screen.blit(overlay, (0, 0))
 
 
+def get_bullet_angle(vx, vy):
+    return -math.degrees(math.atan2(vy, vx)) - 90
+
+
 def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
@@ -116,6 +125,17 @@ def main():
     except:
         print("Error loading images. Make sure all images are in the images folder.")
         return
+
+    # Player bullet uses star_img (scaled down for projectile size)
+    player_bullet_img_base = pygame.transform.smoothscale(star_img, (30, 30))
+
+    try:
+        bullet_img_base = pygame.image.load("images/bullet.png").convert_alpha()
+        bullet_img_base = pygame.transform.smoothscale(bullet_img_base, (50, 50))
+        boss_bullet_img_base = pygame.transform.smoothscale(bullet_img_base, (50, 50))
+        use_bullet_img = True
+    except:
+        use_bullet_img = False
 
     try:
         boss_img = pygame.image.load("images/boss.png").convert_alpha()
@@ -213,7 +233,12 @@ def main():
 
             star_x, star_y = safe_rand_pos(boss_x, boss_y, min_d=420)
 
-    # setup_level(level)
+    # za testiranje
+    if DEBUG_START_LEVEL in (1, 2, 3):
+        level = DEBUG_START_LEVEL
+        score = 0
+        state = "PLAY"
+        setup_level(level)
 
     while True:
         clock.tick(FPS)
@@ -436,11 +461,21 @@ def main():
 
         if boss_active:
             screen.blit(boss_img, (int(boss_x) - 130, int(boss_y) - 130))
+            # Draw boss bullets
             for b in boss_bullets:
-                pygame.draw.circle(screen, RED, (int(b[0]), int(b[1])), 6)
+                if use_bullet_img:
+                    angle = get_bullet_angle(b[2], b[3])
+                    rotated = pygame.transform.rotate(boss_bullet_img_base, angle)
+                    rect = rotated.get_rect(center=(int(b[0]), int(b[1])))
+                    screen.blit(rotated, rect.topleft)
+                else:
+                    pygame.draw.circle(screen, RED, (int(b[0]), int(b[1])), 6)
 
+        # Draw player bullets
         for pb in player_bullets:
-            pygame.draw.circle(screen, YELLOW, (int(pb[0]), int(pb[1])), 5)
+            rotated = pygame.transform.rotate(player_bullet_img_base, get_bullet_angle(pb[2], pb[3]))
+            rect = rotated.get_rect(center=(int(pb[0]), int(pb[1])))
+            screen.blit(rotated, rect.topleft)
 
         rotated_ship = pygame.transform.rotate(spaceship_img, ship_angle)
         rotated_rect = rotated_ship.get_rect(center=(ship_x, ship_y))
