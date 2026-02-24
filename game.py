@@ -227,7 +227,8 @@ def main():
             vx = random.choice([-1, 1]) * sx
             vy = random.choice([-1, 1]) * sy
             w, h = rand_asteroid_size()
-            asteroids.append([ax, ay, vx, vy, w, h])
+            rot_speed = random.uniform(0.2, 0.6) * random.choice([-1, 1])
+            asteroids.append([ax, ay, vx, vy, w, h, 0.0, rot_speed])
 
         fuel_packs = []
         for _ in range(cfg["fuel_packs"]):
@@ -345,6 +346,7 @@ def main():
                 ast[0] += ast[2]
                 ast[1] += ast[3]
                 ast[0], ast[1] = wrap(ast[0], ast[1])
+                ast[6] += ast[7] # za rotacija
 
             ship_rect = pygame.Rect(ship_x - 30, ship_y - 30, 60, 60)
 
@@ -469,7 +471,9 @@ def main():
 
         for ast in asteroids:
             scaled_ast = pygame.transform.smoothscale(asteroid_img, (ast[4], ast[5]))
-            screen.blit(scaled_ast, (int(ast[0]) - ast[4]//2, int(ast[1]) - ast[5]//2))
+            rotated_ast = pygame.transform.rotate(scaled_ast, ast[6])
+            rect = rotated_ast.get_rect(center=(int(ast[0]), int(ast[1])))
+            screen.blit(rotated_ast, rect.topleft)
 
         if boss_active:
             screen.blit(boss_img, (int(boss_x) - 130, int(boss_y) - 130))
