@@ -18,7 +18,6 @@ YELLOW = (255, 234, 5)
 
 SAFE_SPAWN_DISTANCE = 320
 
-
 # 1, 2, 3, None(default) for debugging purposes
 DEBUG_START_LEVEL = None
 
