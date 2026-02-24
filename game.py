@@ -86,12 +86,7 @@ def draw_center_text(screen, font, text, y, color=WHITE):
     screen.blit(surf, (WIDTH // 2 - surf.get_width() // 2, y))
 
 
-def draw_overlay(screen, alpha=160, blur_factor=6):
-    # Fake blur: shrink the current screen down then scale back up
-    small = pygame.transform.smoothscale(screen, (WIDTH // blur_factor, HEIGHT // blur_factor))
-    blurred = pygame.transform.smoothscale(small, (WIDTH, HEIGHT))
-    screen.blit(blurred, (0, 0))
-    # Then darken on top
+def draw_overlay(screen, alpha=220):
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, alpha))
     screen.blit(overlay, (0, 0))
@@ -518,7 +513,7 @@ def main():
 
         if state == "MENU":
             screen.blit(background, (0, 0))
-            draw_overlay(screen, alpha=160)
+            draw_overlay(screen, alpha=200)
 
             draw_center_text(screen, big_font, "ASTRO DELIVERY", HEIGHT // 2 - 230, YELLOW)
 
@@ -552,7 +547,7 @@ def main():
             continue
 
         if state == "LEVEL_COMPLETE":
-            draw_overlay(screen, alpha=160)
+            draw_overlay(screen, alpha=200)
             draw_center_text(screen, big_font, f"LEVEL {level} COMPLETE!", HEIGHT // 2 - 180, YELLOW)
 
             instructions = NEXT_LEVEL_INSTRUCTIONS.get(level)
@@ -569,14 +564,14 @@ def main():
             draw_center_text(screen, font, "ESC to quit", HEIGHT // 2 + 140, WHITE)
 
         if state == "GAME_OVER":
-            draw_overlay(screen, alpha=160)
+            draw_overlay(screen, alpha=200)
             draw_center_text(screen, big_font, "GAME OVER", HEIGHT // 2 - 90, RED)
             draw_center_text(screen, font, f"Score: {score}", HEIGHT // 2 - 10, WHITE)
             draw_center_text(screen, font, "Press R to restart", HEIGHT // 2 + 30, WHITE)
             draw_center_text(screen, font, "ESC to quit", HEIGHT // 2 + 65, WHITE)
 
         if state == "WIN":
-            draw_overlay(screen, alpha=160)
+            draw_overlay(screen, alpha=200)
             draw_center_text(screen, big_font, "YOU WIN!", HEIGHT // 2 - 110, GREEN)
             draw_center_text(screen, font, "Final Boss defeated", HEIGHT // 2 - 30, WHITE)
             draw_center_text(screen, font, f"Score: {score}", HEIGHT // 2 + 10, WHITE)
