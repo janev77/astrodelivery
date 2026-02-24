@@ -131,6 +131,10 @@ def main():
 
         spaceship_img = pygame.transform.smoothscale(spaceship_img, (100, 100))
         star_img = pygame.transform.smoothscale(star_img, (40, 40))
+
+        star_collected_img = pygame.image.load("images/star_collected.png").convert_alpha()
+        star_collected_img = pygame.transform.smoothscale(star_collected_img, (40, 40))
+
         asteroid_img = pygame.transform.smoothscale(asteroid_img, (200, 200))
         station_img = pygame.transform.smoothscale(station_img, (150, 150))
         fuel_tank_img = pygame.transform.smoothscale(fuel_tank_img, (60, 60))
@@ -139,7 +143,8 @@ def main():
         print("Error loading images. Make sure all images are in the images folder.")
         return
 
-    player_bullet_img_base = pygame.transform.smoothscale(star_img, (30, 30))
+    player_bullet_img_base = pygame.transform.smoothscale(star_collected_img, (30, 30))
+
 
     try:
         bullet_img_base = pygame.image.load("images/bullet.png").convert_alpha()
@@ -496,7 +501,7 @@ def main():
         screen.blit(rotated_ship, rotated_rect.topleft)
 
         if carrying:
-            screen.blit(star_img, (int(ship_x) - 20, int(ship_y) - 75))
+            screen.blit(star_collected_img, (int(ship_x) - 20, int(ship_y) - 75))
 
         bar_w = int((fuel / 100) * 150)
         bar_x = WIDTH // 2 - 75
