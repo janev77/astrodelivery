@@ -353,10 +353,13 @@ def main():
                 ast[0], ast[1] = wrap(ast[0], ast[1])
                 ast[6] += ast[7] # za rotacija
 
-            ship_rect = pygame.Rect(ship_x - 30, ship_y - 30, 60, 60)
+            ship_rect = pygame.Rect(ship_x - 18, ship_y - 18, 36, 36)
+
 
             for ast in asteroids:
-                ast_rect = pygame.Rect(ast[0] - ast[4]//2, ast[1] - ast[5]//2, ast[4], ast[5])
+                hit_w = int(ast[4] * 0.45)
+                hit_h = int(ast[5] * 0.45)
+                ast_rect = pygame.Rect(ast[0] - hit_w // 2, ast[1] - hit_h // 2, hit_w, hit_h)
                 if ship_rect.colliderect(ast_rect):
                     state = "GAME_OVER"
 
@@ -423,7 +426,7 @@ def main():
                     new_bullets.append(b)
                 boss_bullets = new_bullets
 
-                boss_rect = pygame.Rect(boss_x - 110, boss_y - 110, 220, 220)
+                boss_rect = pygame.Rect(boss_x - 57, boss_y - 57, 115, 115)
                 if ship_rect.colliderect(boss_rect):
                     state = "GAME_OVER"
 
@@ -438,7 +441,7 @@ def main():
                     life -= 1
 
                     if boss_active:
-                        boss_rect = pygame.Rect(boss_x - 110, boss_y - 110, 220, 220)
+                        boss_rect = pygame.Rect(boss_x - 57, boss_y - 57, 115, 115)
                         bullet_rect = pygame.Rect(x - 6, y - 6, 12, 12)
                         if bullet_rect.colliderect(boss_rect):
                             boss_hp -= 1
