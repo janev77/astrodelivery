@@ -19,7 +19,7 @@ pip install pygame
 
 ## Executing
 ```bash
-python main.py
+python game.py
 ```
 
 ## Project Structure
